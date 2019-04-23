@@ -1,0 +1,21 @@
+{
+  "name": "nodejs-skeleton",
+  "version": "1.0.0",
+  "description": "Brebones project with minimal configuration: backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Silviu Oprea",
+  "license": "ISC",
+  "dependencies": {
+    "connect-mongo": "^2.0.3",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.4.14",
+    "mustache-express": "^1.2.8"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.11"
+  }
+}

@@ -24,7 +24,10 @@ function initCreateTabObj() {
 
 function initDataTabObj() {
     return {
-        mainDiv: document.getElementById('dataTab')
+        infoDiv: document.getElementById('infoDiv'),
+        csvDiv: document.getElementById('csvDiv'),
+        submitDiv: document.getElementById('submitDiv'),
+        feedbackDiv: document.getElementById('feedbackDiv')
     }
 }
 

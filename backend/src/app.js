@@ -12,17 +12,9 @@ app.engine('html', mustacheExpress());
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 
-app.use(session({
-    secret: 'work hard - play hard',
-    resave: true,
-    saveUninitialized: false,
-    store: new MongoStore({
-        mongooseConnection: db.testDb
-    })
-}));
-app.use(require('./middlewares/say_hello'));
+app.use(require('./middlewares/security'));
 app.use(require('./controllers'));
 
-const server = app.listen(8000, function () {
-    console.log(`Listening on port 8000`);
+const server = app.listen(8090, function () {
+    console.log(`Listening on port 8090`);
 });

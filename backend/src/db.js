@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const conf = require('./config');
 
 mongoose.Promise = global.Promise;
-testDb = mongoose.createConnection(
-    `mongodb://${conf.db.host}:${conf.db.port}/test`, { useNewUrlParser: true });
+eagleDb = mongoose.createConnection(
+    `mongodb://${conf.db.host}:${conf.db.port}/eagle`, { useNewUrlParser: true });
 
 module.exports = {
-    testDb: testDb
+    eagleDb: eagleDb
 };

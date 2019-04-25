@@ -7,10 +7,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        .create-remove-option-button {
+            margin-top: 1rem;
+        }
+        .create-question-div {
+            padding: .5rem;
+        }
+        .create-answer-type-radios {
+            margin-right: 1rem;
+        }
+        #data-progress-bar-container-div {
+            border: 1px solid teal;
+            padding: 0;
+        }
+        #data-progress-bar-container-div .percent {
+            background-color: gray;
+            height: auto;
+            width: 0;
+        }
+    </style>
 </head>
 
 <body>
-<div class="container">
+<div class="container z-depth-1">
     <div class="row">
         <div class="col s12">
             <ul class="tabs" id="tabDiv">
@@ -27,16 +47,21 @@
                 <a id="addQuestionButton" class="btn-floating btn-large waves-effect waves-light teal"><i class="material-icons">add</i></a>
             </div>
             <div class="col s2 push-s8">
-                <a id="create2dataButton" class="waves-effect waves-light btn-small">Next<i class="material-icons right">navigate_next</i></a>
+                <a id="create2dataButton" class="waves-effect waves-light btn">Next<i class="material-icons right">navigate_next</i></a>
             </div>
         </div>
         <div id="dataTab" class="col s12">
             <!-- Questions -->
-            <div class="col s12">
+            <div class="row" id="infoDiv">
             </div>
-            <!-- Plus button -->
-            <div class="col s2 push-s10">
-                <a id="data2FinishButton" class="waves-effect waves-light btn-small">Next<i class="material-icons right">navigate_next</i></a>
+            <div class="row" id="csvDiv">
+            </div>
+            <div class="row" id="submitDiv">
+            </div>
+            <div class="row">
+                <div class="col s12" id="feedbackDiv">
+
+                </div>
             </div>
         </div>
     </div>

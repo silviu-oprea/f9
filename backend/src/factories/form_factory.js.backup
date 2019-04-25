@@ -1,0 +1,291 @@
+const Mustache = require('mustache');
+
+const headerHtml =  `
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <!--Import Google Icon Font-->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!--Import materialize.css-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <!--Let browser know website is optimized for mobile-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
+    <body>
+    <div class="container z-depth-1">
+`;
+const formStartTemplate = projectName =>
+`
+    <form action="/forms/${projectName}" id="main-form" name="main-form" method="post">
+`;
+const formEndHtml = '</form>';
+const footerHtml = `
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        function groupBy(xs, key) {
+          return xs.reduce(function(rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+          }, {});
+        }
+        
+        function strMapToObj(strMap) {
+            let obj = Object.create(null);
+            for (let [k,v] of strMap) {
+                // We don’t escape the key '__proto__'
+                // which can cause problems on older engines
+                if (v instanceof Map) {
+                    obj[k] = strMapToObj(v);
+                } else {
+                    obj[k] = v;
+                }
+                
+            }
+            return obj;
+        }        
+
+        function getRadioValue(inputs) {
+            for (let input of inputs) {
+                if (input.checked) {
+                    return input.value.trim();
+                }
+            }
+        }
+        
+        function getFormData(form, prolificPid, completionCode, projectName, dataId, msgSpan) {
+            msgSpan.innerText = '';
+            
+            const idToAnswer = new Map();
+
+            const radios = document.getElementsByClassName('form-element-radio');
+            const idToRadioGroup = groupBy(Array.from(radios), 'id');
+
+            for (let id of Object.keys(idToRadioGroup)) {
+                const value = getRadioValue(idToRadioGroup[id]) || undefined;
+                if (typeof value === "undefined") {
+                    msgSpan.innerText = 'Form incomplete.'
+                    return;
+                }
+                idToAnswer.set(id, value);
+            }
+            
+            const dropdowns = document.getElementsByClassName('form-element-dropdown');
+            for (let dropdown of dropdowns) {
+                const id = dropdown.id;
+                const value = dropdown.value.trim() || undefined
+                if (typeof value === "undefined") {
+                    msgSpan.innerText = 'Form incomplete.'
+                    return;
+                }
+                idToAnswer.set(id, value);
+            }
+
+            const texts = document.getElementsByClassName('form-element-text');
+            for (let text of texts) {
+                const id = text.id;
+                const value = text.value.trim() || undefined
+                if (typeof value === "undefined") {
+                    msgSpan.innerText = 'Form incomplete.'
+                    return;
+                }
+                idToAnswer.set(id, value);
+            }
+            const result = new Map();
+            result.set('prolificPid', prolificPid);
+            result.set('completionCode', completionCode);
+            result.set('projectName', projectName);
+            result.set('dataId', dataId);
+            result.set('answers', idToAnswer);
+            
+            return result;
+        }    
+        
+        function submitForm(evt, prolificPid, completionCode, projectName, dataId, form, msgSpan) {
+            evt.preventDefault();
+            const formData = getFormData(form, prolificPid, completionCode, projectName, dataId, msgSpan);
+            if (typeof formData !== "undefined") {
+                console.log(formData);
+                fetch('http://localhost:8090/forms/' + projectName, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(strMapToObj(formData))
+                }).then(function (res) {
+                    return res.json();
+                }).then(function (res) {
+                    if (res.status !== 'success') {
+                        msgSpan.innerText = 'Something went wrong :( Please contact us at silviu.oprea@ed.ac.uk with a screenshot that includes this page and at least the address bar of your browser. ' + res.msg; 
+                    } else {
+                        // window.location.replace(res.redirectUrl);
+                        msgSpan.innerText = res.redirectUrl;
+                    }
+                });
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {            
+            const elems = document.querySelectorAll('select');
+            const instances = M.FormSelect.init(elems, {});
+            
+            const mainForm = document.getElementById('main-form');
+            const msgSpan = document.getElementById('msg-span');
+            const prolificPid = document.getElementById('prolific-pid-input').value;
+            const completionCode = document.getElementById('completion-code-input').value;
+            const projectName = document.getElementById('project-name-input').value;
+            const dataId = document.getElementById('data-id-input').value;
+            
+            mainForm.onsubmit = function(evt) {
+                submitForm(evt, prolificPid, completionCode, projectName, dataId, this, msgSpan);
+            };
+        });
+    </script>
+    </body>
+    </html>
+`;
+
+const titleTemplate = titleText => `
+    <div class="row">
+        <div class="col s12 teal-text text-darken-2">
+            <h3>${titleText}</h3>        
+        </div>
+    </div>    
+`;
+
+const messageTemplate = messageText => `
+    <div class="row">
+        <div class="col s12 teal-text text-darken-2">
+            <p3>${messageText}</p3>        
+        </div>
+    </div>
+`;
+
+const questionTemplate = (index, questionText, allAnswersHtml) =>`
+    <div class="row">
+        <div class="col s12 teal-text text-darken-2">
+            <p>${index}) ${questionText}</p>        
+        </div>
+        <div class="col s12 input-field">
+            ${allAnswersHtml}            
+        </div>
+    </div>
+`;
+
+const radioAnswerTemplate = (questionId, values) => {
+    const optionHtmls = [];
+    for (const value of values) {
+        optionHtmls.push(`
+            <p>
+              <label>
+                <input name="${questionId}" id="${questionId}" type="radio" value="${value}" class="form-element-radio"/>
+                <span>${value}</span>
+              </label>
+            </p>
+        `);
+    }
+    return optionHtmls.join('');
+};
+
+const dropdownAnswerTemplate = (questionId, label, values) => {
+    const optionHtmls = [];
+    for (const value of values) {
+        optionHtmls.push(`
+            <option value="${value}">${value}</option>
+        `);
+    }
+    return `
+        <select id="${questionId}" name="${questionId}" class="form-element-dropdown">
+            <option value="" disabled selected>Choose your option</option>
+            ${optionHtmls.join('')}
+        </select>
+        <label>${label}</label>
+    `;
+};
+
+const textAnswerTemplate = (questionId) => {
+    return `
+        <input id="${questionId}" name="${questionId}" type="text" class="form-element-text">
+        <label for="${questionId}">Type your answer here</label>
+<!--        <span class="helper-text" data-error="wrong" data-success="right">Helper text</span>    -->
+    `;
+};
+
+const submitButtonTemplate = `
+    <div class="row">
+        <div class="col s12 teal-text text-darken-2">
+            <button class="btn waves-effect waves-light" type="submit" name="action" form="main-form">
+                Submit
+                <i class="material-icons right">send</i>
+            </button>
+            <span class="red-text" id="msg-span"></span>
+        </div>
+    </div>    
+`;
+
+const hiddensNoData = (projectName, prolificPid, completionCode) => `
+    <input type="hidden" class="hidden hide" name="projectName" value="${projectName}" id="project-name-input">
+    <input type="hidden" class="hidden hide" name="prolificPid" value="${prolificPid}" id="prolific-pid-input">
+    <input type="hidden" class="hidden hide" name="completionCode", value="${completionCode}" id="completion-code-input">
+`;
+
+const hiddensWithData = (projectName, prolificPid, completionCode, dataId) => `
+    <input type="hidden" class="hidden hide" name="projectName" value="${projectName}" id="project-name-input">
+    <input type="hidden" class="hidden hide" name="prolificPid" value="${prolificPid}" id="prolific-pid-input">
+    <input type="hidden" class="hidden hide" name="completionCode" value="${completionCode}" id="completion-code-input">
+    <input type="hidden" class="hidden hide" name="dataId" value="${dataId}" id="data-id-input">
+`;
+
+function generateNoDataForm(prolificPid, completionCode, projectName, questions, dataPoint) {
+    const titleHtml = titleTemplate(`Welcome to ${projectName}.`);
+
+    const questionHtmlList = [];
+    for (const question of questions) {
+        let allAnswersHtml;
+        switch (question.answerSpec.answerType) {
+            case 'radio':
+                allAnswersHtml = radioAnswerTemplate(question._hid, question.answerSpec.options);
+                break;
+            case 'dropdown':
+                allAnswersHtml = dropdownAnswerTemplate(question._hid, '', question.answerSpec.options);
+                break;
+            case 'text':
+                allAnswersHtml = textAnswerTemplate(question._hid);
+                break;
+            default:
+        }
+        const currentQuestionHtml = questionTemplate(questionHtmlList.length + 1, question.text, allAnswersHtml);
+        questionHtmlList.push(currentQuestionHtml);
+    }
+    const allQuestionsHtml = questionHtmlList.join('');
+
+    let hiddens;
+    if (typeof dataPoint === "undefined") {
+        hiddens = hiddensNoData(projectName, prolificPid, completionCode);
+    } else {
+        hiddens = hiddensWithData(projectName, prolificPid, completionCode, dataPoint._hid);
+    }
+    return headerHtml + formStartTemplate(projectName) + titleHtml + allQuestionsHtml + submitButtonTemplate + hiddens + formEndHtml + footerHtml;
+}
+
+function generateForm(prolific_pid, completionCode, projectName, questions, dataPoint) {
+    if (typeof dataPoint === "undefined") {
+        // return generateDataForm(formSpec);
+        return generateNoDataForm(prolific_pid, completionCode, projectName, questions, dataPoint);
+    } else {
+        const form = generateNoDataForm(prolific_pid, completionCode, projectName, questions, dataPoint);
+        return Mustache.render(form, dataPoint);
+    }
+}
+
+function generateMsg(title, message) {
+    const titleHtml = titleTemplate(`Welcome to ${title}.`);
+    const messageHtml = messageTemplate(message);
+    return headerHtml + titleHtml + messageHtml + footerHtml;
+}
+
+module.exports = {
+    generateForm: generateForm,
+    generateMsg: generateMsg
+};

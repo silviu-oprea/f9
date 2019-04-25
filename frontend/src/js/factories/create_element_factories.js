@@ -1,7 +1,7 @@
 import {createElement} from "../utils";
 
 const answerTypeRadioFactory = function (questionId, value) {
-    const outerSpan = createElement('span');
+    const outerSpan = createElement('span', {classList: ['create-answer-type-radios']});
     const label = createElement('label');
     const input = createElement('input', {attrs: {name: `answerTypeRadios-${questionId}`, type: 'radio', value: value}});
     const innerSpan = createElement('span', {}, value);
@@ -19,10 +19,10 @@ const answerTypeRadioFactory = function (questionId, value) {
 function radioAnswerObjFactory(questionId) {
     const mainDiv = createElement('div', {classList: ['col', 's12', 'hide']});
 
-    const allOptionsDiv = createElement('div', {classList: ['input-field', 'col', 's12']});
+    const allOptionsDiv = createElement('div', {classList: ['col', 's12']});
 
     const addButtonDiv = createElement('div', {classList: ['col', 's12']});
-    const a = createElement('a', {classList: ['btn-floating', 'btn-large', 'waves-effect', 'waves-light', 'teal']});
+    const a = createElement('a', {classList: ['btn-floating', 'waves-effect', 'waves-light', 'teal']});
     const i = createElement('i', {classList: ['material-icons']}, 'add');
     a.appendChild(i);
     addButtonDiv.appendChild(a);
@@ -46,12 +46,13 @@ function radioAnswerObjFactory(questionId) {
 export function radioAnswerOptionFactory(questionId, optionId) {
     const inputDiv = createElement('div', {classList: ['input-field', 'col', 's8']});
     const input = createElement('input', {attrs: {type: 'text', id: `question-${questionId}-radioOption-${optionId}`}});
+    input.value = 'It says: {{ANIMAL_SOUND}}';
     const label = createElement('label', {attrs: {for: `question-${questionId}-radioOption-${optionId}`}}, 'Enter option');
     inputDiv.appendChild(input);
     inputDiv.appendChild(label);
 
-    const removeButtonDiv = createElement('div', {classList: ['col', 's4']});
-    const a = createElement('a', {classList: ['btn-floating', 'btn-large', 'waves-effect', 'waves-light', 'red', 'lighten-1']});
+    const removeButtonDiv = createElement('div', {classList: ['col', 's4', 'create-remove-option-button']});
+    const a = createElement('a', {classList: ['btn-floating', 'waves-effect', 'waves-light', 'red', 'lighten-1']});
     const i = createElement('i', {classList: ['material-icons']}, 'remove');
     a.appendChild(i);
     removeButtonDiv.appendChild(a);
@@ -72,20 +73,27 @@ function textAnswerFactory(questionId) {
     };
 }
 
-export function questionFactory(questionId) {
-    const qDiv = createElement('div', {classList: ['row', 'z-depth-1']});
+export function questionObjFactory(questionId) {
+    const mainDiv = createElement('div', {classList: ['row', 'create-question-div']});
 
-    // Main div ======================================================================= //
-    const mainDiv = createElement('div', {classList: ['col', 's11']});
+    // 1) Questions div =============================================================== //
+    const questionsDiv = createElement('div', {classList: ['col', 's11', 'z-depth-1']});
 
-    // Main div: question text ======================================================== //
+    // 1a) Questions div: question text div =========================================== //
     const questionTextDiv = createElement('div', {classList: ['input-field', 'col', 's12']});
     const questionTextInput = createElement('input', {attrs: {id: `questionTextInput-${questionId}`, type: 'text'}});
+    questionTextInput.value = 'What does the {{ANIMAL}} say?';
     const questionTextInputLabel = createElement('label', {attrs: {for:  `questionTextInput-${questionId}`}}, 'Enter question');
     questionTextDiv.appendChild(questionTextInput);
     questionTextDiv.appendChild(questionTextInputLabel);
 
-    // Main div: answer type ========================================================== //
+    const numInstancesPerPageDiv = createElement('div', {classList: ['input-field', 'col', 's12']});
+    const numInstancesPerPageInput = createElement('input', {attrs: {id: `numInstancesPerPageInput-${questionId}`, type: 'number'}});
+    const numInstancesPerPageLabel = createElement('label', {attrs: {for:  `numInstancesPerPageInput-${questionId}`}}, 'Number of instances of this question per page');
+    numInstancesPerPageDiv.appendChild(numInstancesPerPageInput);
+    numInstancesPerPageDiv.appendChild(numInstancesPerPageLabel);
+
+    // 1b) Questions div: answer type radios div======================================= //
     const answerTypeDiv = createElement('div', {classList: ['input-field', 'col', 's12']});
     const answerTypeSpan = createElement('span', {}, 'Answer type:');
 
@@ -98,32 +106,34 @@ export function questionFactory(questionId) {
     answerTypeDiv.appendChild(answerTypeDropdown.outerSpan);
     answerTypeDiv.appendChild(answerTypeText.outerSpan);
 
-    // Main div: answer div =========================================================== //
+    // 1c) Questions div: divs for each answer type =================================== //
     const radioAnswerObj = radioAnswerObjFactory(questionId);
     const dropdownAnswerObj = radioAnswerObjFactory(questionId);
     const textAnswerObj = textAnswerFactory(questionId);
 
-    mainDiv.appendChild(questionTextDiv);
-    mainDiv.appendChild(answerTypeDiv);
-    mainDiv.appendChild(radioAnswerObj.mainDiv);
-    mainDiv.appendChild(dropdownAnswerObj.mainDiv);
-    mainDiv.appendChild(textAnswerObj.mainDiv);
+    questionsDiv.appendChild(questionTextDiv);
+    questionsDiv.appendChild(numInstancesPerPageDiv);
+    questionsDiv.appendChild(answerTypeDiv);
+    questionsDiv.appendChild(radioAnswerObj.mainDiv);
+    questionsDiv.appendChild(dropdownAnswerObj.mainDiv);
+    questionsDiv.appendChild(textAnswerObj.mainDiv);
 
-    // Remove button ================================================================== //
-    const removeDiv = createElement('div', {classList: ['col', 's1', 'valign-wrapper']});
+    // 2) Remove button ================================================================== //
+    const removeButtonDiv = createElement('div', {classList: ['col', 's1']});
     const a = createElement('a', {classList: ['btn-floating', 'btn-large',  'waves-effect', 'waves-light', 'red', 'lighten-1']});
     const i = createElement('i', {classList: ['material-icons']}, 'remove');
     a.appendChild(i);
-    removeDiv.appendChild(a);
+    removeButtonDiv.appendChild(a);
 
-    qDiv.appendChild(mainDiv);
-    qDiv.appendChild(removeDiv);
+    mainDiv.appendChild(questionsDiv);
+    mainDiv.appendChild(removeButtonDiv);
 
     return {
         id: questionId,
-        mainDiv: qDiv,
+        mainDiv: mainDiv,
         removeButton: a,
         textInput: questionTextInput,
+        numInstancesPerPageInput: numInstancesPerPageInput,
         answerTypeRadioInputs: [answerTypeRadio.input, answerTypeDropdown.input, answerTypeText.input],
         radioAnswerObj: radioAnswerObj,
         dropdownAnswerObj: dropdownAnswerObj,

@@ -1,4 +1,4 @@
-import {questionFactory, radioAnswerOptionFactory} from "../factories/create_element_factories";
+import {questionObjFactory, radioAnswerOptionFactory} from "../factories/create_element_factories";
 import * as utils from "../utils";
 
 function registerAnswerTypeRadioInputsEvent(questionObj, elems) {
@@ -30,18 +30,17 @@ function registerAnswerTypeRadioInputsEvent(questionObj, elems) {
     }
 }
 
-function registerRadioAnswerEvents(question, elems) {
+function registerRadioAnswerObjEvents(question, elems) {
     const radioAnswerObj = question.radioAnswerObj;
     radioAnswerObj.addButton.onclick = function () {
-        // Generate option
+        // Generate option object
         const optionId = radioAnswerObj.getNextOptionId();
         const optionObj = radioAnswerOptionFactory(question.id, optionId);
-        // Save option
+        // Save option in idToOptionObjMap
         radioAnswerObj.idToOptionObjMap.set(optionId, optionObj);
-        // Append option in DOM
+        // Append option in DOM and register removal
         radioAnswerObj.optionsDiv.appendChild(optionObj.inputDiv);
         radioAnswerObj.optionsDiv.appendChild(optionObj.removeButtonDiv);
-        // Register removal div
         optionObj.removeButton.onclick = function () {
             radioAnswerObj.optionsDiv.removeChild(optionObj.inputDiv);
             radioAnswerObj.optionsDiv.removeChild(optionObj.removeButtonDiv);
@@ -50,18 +49,17 @@ function registerRadioAnswerEvents(question, elems) {
     }
 }
 
-function registerDropdownAnswerEvents(question, elems) {
+function registerDropdownAnswerObjEvents(question, elems) {
     const radioAnswerObj = question.dropdownAnswerObj;
     radioAnswerObj.addButton.onclick = function () {
-        // Generate option
+        // Generate option object
         const optionId = radioAnswerObj.getNextOptionId();
         const optionObj = radioAnswerOptionFactory(question.id, optionId);
-        // Save option
+        // Save option in idToOptionObjMap
         radioAnswerObj.idToOptionObjMap.set(optionId, optionObj);
-        // Append option in DOM
+        // Append option in DOM and register removal
         radioAnswerObj.optionsDiv.appendChild(optionObj.inputDiv);
         radioAnswerObj.optionsDiv.appendChild(optionObj.removeButtonDiv);
-        // Register removal div
         optionObj.removeButton.onclick = function () {
             radioAnswerObj.optionsDiv.removeChild(optionObj.inputDiv);
             radioAnswerObj.optionsDiv.removeChild(optionObj.removeButtonDiv);
@@ -70,24 +68,23 @@ function registerDropdownAnswerEvents(question, elems) {
     }
 }
 
-function registerQuestionEvents(question, elems) {
+function registerQuestionObjEvents(question, elems) {
     registerAnswerTypeRadioInputsEvent(question, elems);
-    registerRadioAnswerEvents(question, elems);
-    registerDropdownAnswerEvents(question, elems);
+    registerRadioAnswerObjEvents(question, elems);
+    registerDropdownAnswerObjEvents(question, elems);
 }
 
 function registerAddQuestionButtonEvent(elems) {
     const createTabObj = elems.createTabObj;
     createTabObj.addQuestionButton.onclick = function () {
-        // Generate question obj
+        // Generate question obj and register its events
         const questionId = createTabObj.getNextQuestionId();
-        const questionObj = questionFactory(questionId);
-        registerQuestionEvents(questionObj, elems);
-        // Save question obj in createTab elements
+        const questionObj = questionObjFactory(questionId);
+        registerQuestionObjEvents(questionObj, elems);
+        // Save question obj in createTab.idToQuestionObjMap
         createTabObj.idToQuestionObjMap.set(questionId, questionObj);
-        // Append question in Dom
+        // Append question in Dom and register question removal
         createTabObj.questionsDiv.appendChild(questionObj.mainDiv);
-        // Register question removal
         questionObj.removeButton.onclick = function () {
             createTabObj.questionsDiv.removeChild(questionObj.mainDiv);
             createTabObj.idToQuestionObjMap.delete(questionId);

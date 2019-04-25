@@ -27,3 +27,20 @@ export function showElement(toShow, toHide) {
     }
     toShow.classList.remove('hide');
 }
+
+export function clearElement(el) {
+    while (el.firstChild) {
+        el.removeChild(el.firstChild);
+    }
+}
+
+export function setElementContent(el, ...children) {
+    clearElement(el);
+    for (const child of children) {
+        el.appendChild(child);
+    }
+}
+
+export function stringIsPositiveInteger(s) {
+    return /^\+?[1-9][\d]*$/.test(s);
+}

@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     entry: [
         '@babel/polyfill',
-        './src/js/index.js'
+        './src/js/animals_index.js'
     ],
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -15,8 +15,8 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: './src/index.html'
+            filename: 'animals.html',
+            template: './src/animals.html'
         })
     ],
     module: {

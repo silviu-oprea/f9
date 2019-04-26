@@ -8,7 +8,10 @@ const FormSpecSchema = new mongoose.Schema({
     numAnswersReceived: Number,
     numAnswersPerDataPoint: Number,
     formDataVars: [String],
-    data: [{}],
+    data: [{
+        _hid: Number,
+        numAnswersReceived: Number
+    }],
     questions: [{
         _hid: Number,
         text: String,
@@ -30,7 +33,7 @@ const FormSpecSchema = new mongoose.Schema({
             }
         }
     }]
-});
+}, {strict: false});
 
 FormSpecSchema.index({projectName: 1}, {unique: true});
 FormSpecSchema.index({numAnswers: 1});

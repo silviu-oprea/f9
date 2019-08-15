@@ -11,6 +11,7 @@ const ResponseSchema = new mongoose.Schema({
         // answerType: String,
         // answer: String,
         // hasData: Bool
+        // 
     }]
 }, {strict: false});
 

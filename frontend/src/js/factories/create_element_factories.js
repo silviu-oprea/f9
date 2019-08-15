@@ -46,7 +46,7 @@ function radioAnswerObjFactory(questionId) {
 export function radioAnswerOptionFactory(questionId, optionId) {
     const inputDiv = createElement('div', {classList: ['input-field', 'col', 's8']});
     const input = createElement('input', {attrs: {type: 'text', id: `question-${questionId}-radioOption-${optionId}`}});
-    input.value = 'It says: {{ANIMAL_SOUND}}';
+    // input.value = 'It says: {{ANIMAL_SOUND}}';
     const label = createElement('label', {attrs: {for: `question-${questionId}-radioOption-${optionId}`}}, 'Enter option');
     inputDiv.appendChild(input);
     inputDiv.appendChild(label);
@@ -81,10 +81,12 @@ export function questionObjFactory(questionId) {
 
     // 1a) Questions div: question text div =========================================== //
     const questionTextDiv = createElement('div', {classList: ['input-field', 'col', 's12']});
-    const questionTextInput = createElement('input', {attrs: {id: `questionTextInput-${questionId}`, type: 'text'}});
-    questionTextInput.value = 'What does the {{ANIMAL}} say?';
+    // const questionTextInput = createElement('input', {attrs: {id: `questionTextInput-${questionId}`, type: 'text'}});
+    const questionTextTextarea = createElement('textarea', {classList: ['materialize-textarea'], attrs: {id: `questionTextInput-${questionId}`, type: 'text'}});
+    // questionTextInput.value = 'What does the {{ANIMAL}} say?';
     const questionTextInputLabel = createElement('label', {attrs: {for:  `questionTextInput-${questionId}`}}, 'Enter question');
-    questionTextDiv.appendChild(questionTextInput);
+    // questionTextDiv.appendChild(questionTextInput);
+    questionTextDiv.appendChild(questionTextTextarea);
     questionTextDiv.appendChild(questionTextInputLabel);
 
     const numInstancesPerPageDiv = createElement('div', {classList: ['input-field', 'col', 's12']});
@@ -132,7 +134,8 @@ export function questionObjFactory(questionId) {
         id: questionId,
         mainDiv: mainDiv,
         removeButton: a,
-        textInput: questionTextInput,
+        // textInput: questionTextInput,
+        textInput: questionTextTextarea,
         numInstancesPerPageInput: numInstancesPerPageInput,
         answerTypeRadioInputs: [answerTypeRadio.input, answerTypeDropdown.input, answerTypeText.input],
         radioAnswerObj: radioAnswerObj,

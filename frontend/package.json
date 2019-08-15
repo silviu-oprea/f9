@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development",
+    "buildDynamicForm": "webpack --config webpack.dynamic_form.config.js --mode production",
     "build": "webpack --mode production",
     "start": "webpack-dev-server --mode development --open",
     "test": "echo \"Error: no test specified\" && exit 1"

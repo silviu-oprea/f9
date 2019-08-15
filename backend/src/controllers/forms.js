@@ -10,7 +10,7 @@ router.use(bodyParser.json());
 
 const dataHidToStartedTime = new Map();
 
-const minutes = 30, the_interval = minutes * 60 * 1000, diff = 10;
+const minutes = 5, the_interval = minutes * 60 * 1000, diff = 1;
 setInterval(function() {
     const idsToRemove = [];
     dataHidToStartedTime.forEach((timestamps, pointId, map) => {
@@ -42,11 +42,39 @@ function formIsCompleted(formSpec) {
     return formSpec.numAnswersReceived + numActivePotentialAnswers >= formSpec.numAnswers;
 }
 
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+}
+
+function getRandomKey(collection) {
+    let keys = Array.from(collection.keys());
+    return keys[Math.floor(Math.random() * keys.length)];
+}
+
 function getNextDataPoint(formSpec, blacklist) {
     if (typeof formSpec.data === "undefined") {
         return;
     }
-    for (const point of formSpec.data) {
+    let dpIndexes = [...Array(formSpec.data.length).keys()];
+    dpIndexes = shuffle(dpIndexes);
+
+    for (let idx of dpIndexes) {
+        const point = formSpec.data[idx];
         if (blacklist.includes(point._hid)) {
             continue;
         }
@@ -56,6 +84,7 @@ function getNextDataPoint(formSpec, blacklist) {
             if (!dataHidToStartedTime.has(point._hid)) {
                 const returnedTime = new Date().getTime();
                 dataHidToStartedTime.set(point._hid, new Set([returnedTime]));
+                // console.log(`Cool I am returning ${point._hid} with tweet id ${point.tweet_id} that has ${point.numAnswersReceived} answers`);
                 return {
                     point: point,
                     returnedTime: returnedTime
@@ -68,6 +97,7 @@ function getNextDataPoint(formSpec, blacklist) {
                 if (numPotentialAnswers < formSpec.numAnswersPerDataPoint) {
                     const returnedTime = new Date().getTime();
                     pointInstanceSet.add(returnedTime);
+                    // console.log(`Cool I am returning ${point._hid} with tweet id ${point.tweet_id} that has ${point.numAnswersReceived} answers`);
                     return {
                         point: point,
                         returnedTime: returnedTime
@@ -76,6 +106,24 @@ function getNextDataPoint(formSpec, blacklist) {
             }
         }
     }
+
+    // If we are here try one from the state
+    // if (dataHidToStartedTime.size > 0) {
+    //     const pointHid = getRandomKey(dataHidToStartedTime);
+    //     const point = dataHidToStartedTime.get(pointHid);
+    //     return {
+    //         point: point,
+    //         returnedTime: new Date().getTime()
+    //     }
+    // } else {
+        // else just a random one
+    const point = formSpec.data[dpIndexes[0]];
+    // console.log(`Oh no I am returning ${point._hid} with tweet id ${point.tweet_id} that has ${point.numAnswersReceived} answers`);
+    return {
+        point: point,
+        returnedTime: new Date().getTime()
+    }
+    // }
 }
 
 function getMostFreqDataQuestion(formSpec) {
@@ -118,9 +166,9 @@ router.get('/:projectName', function (req, res, next) {
 
     FormSpecModel.findOne({projectName: req.params.projectName})
         .then(formSpec => {
-            if (formIsCompleted(formSpec)) {
-                return res.send(form_factory.generateMsg(formSpec.projectName, "Form full at the moment. Please refresh the page in 5 minutes and try again. If you still get this message please email us at silviu.oprea@ed.ac.uk with a screenshot that includes this page and the address bar of your browser. We'll reply in minutes."));
-            }
+            // if (formIsCompleted(formSpec)) {
+            //     return res.send(form_factory.generateMsg(formSpec.projectName, "Form full at the moment. Please refresh the page in 5 minutes and try again. If you still get this message please email us at silviu.oprea@ed.ac.uk with a screenshot that includes this page and the address bar of your browser. We'll reply in minutes."));
+            // }
 
             // TODO change this. All data questions should have the same number of instances.
             const numInstancesOfMostFreqDataQuestion = getMostFreqDataQuestion(formSpec);
@@ -142,6 +190,8 @@ router.get('/:projectName', function (req, res, next) {
 router.post('/:projectName', function (req, res, next) {
     const response = req.body;
     // Save response
+    console.log(response);
+    // res.send('hi');
     ResponseModel.create(response)
         .then(doc => {
             // For each data point used, increment numAnswersReceived for that particularly data point

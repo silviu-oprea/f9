@@ -1,5 +1,5 @@
 const db = {
-    host: 'localhost',
+    host: 'carahatas.inf.ed.ac.uk',
     port: 27017
 };
 

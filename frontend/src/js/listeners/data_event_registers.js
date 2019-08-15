@@ -119,7 +119,7 @@ function registerSubmitListener(submitObj, state, elems) {
         state.numAnswers = parseInt(state.numAnswers);
         elems.dataTabObj.feedbackDiv.innerText = 'Submitting...';
         console.log(JSON.stringify(state));
-        fetch('http://localhost:8090/form_receiver', {
+        fetch('https://play.oprea.ch/form_receiver', {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'

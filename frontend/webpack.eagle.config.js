@@ -4,19 +4,19 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     entry: [
         '@babel/polyfill',
-        './src/js/index.js'
+        './src/js/eagle_index.js'
     ],
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'js/bundle.js'
+        filename: 'js/eagle_bundle.js'
     },
     devServer: {
         contentBase: './dist'
     },
     plugins: [
         new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: './src/index.html'
+            filename: 'eagle.html',
+            template: './src/eagle.html'
         })
     ],
     module: {
